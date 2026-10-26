@@ -104,7 +104,7 @@ const SV={coins:0,owned:[0],bike:0,name:''};
 try{Object.assign(SV,JSON.parse(localStorage.getItem('neonRiderSave')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('neonRiderSave',JSON.stringify(SV))}catch(e){}};
 let B=BIKES[0];
-function setState(s){state=s;document.body.dataset.s=s}
+function setState(s){state=s;document.body.dataset.s=s;if(typeof syncMusic==='function')syncMusic()}
 
 /* ---------- renderer / scene ---------- */
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
@@ -136,7 +136,7 @@ const barTex=ctex(128,32,(g,w,h)=>{g.fillStyle='#7b8094';g.fillRect(0,0,w,h);g.f
 const barM=new THREE.MeshLambertMaterial({map:barTex,side:THREE.DoubleSide});
 for(const s of[-1,1]){const b=new THREE.Mesh(new THREE.PlaneGeometry(600,.9),barM);b.rotation.y=Math.PI/2;b.position.set(s*8.4,.45,-250);scene.add(b);}
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(900,900),lam(0x14241f));ground.rotation.x=-Math.PI/2;ground.position.set(0,-.15,-300);scene.add(ground);
-const hillM=new THREE.MeshLambertMaterial({color:0x1a0a30,flatShading:true});
+const hillM=new THREE.MeshLambertMaterial({color:0x1a0a30});
 for(let i=0;i<9;i++){const h=new THREE.Mesh(new THREE.ConeGeometry(rnd(60,110),rnd(40,90),6),hillM);h.position.set(-360+i*90+rnd(-20,20),15,-270-rnd(0,30));scene.add(h);}
 
 /* scenery ring: trees, streetlights, signs (recycled) */
@@ -205,6 +205,13 @@ function stepSparks(dt){if(!sparks.visible)return;
  spGeo.attributes.position.needsUpdate=true;}
 
 /* ---------- audio ---------- */
+// Gameplay soundtrack (file is packaged beside index.html).
+const music=new Audio('./very_scary_neon_rider_music_for_gameplay.mp3');
+music.loop=true; music.preload='auto'; music.volume=.55;
+function syncMusic(){
+ if(state==='play'&&!muted){const p=music.play();if(p&&p.catch)p.catch(()=>{});}
+ else music.pause();
+}
 let AC,mg,eo1,eo2,ef,eg,wg,noiseBuf;
 function initAudio(){
  if(AC)return;
@@ -225,7 +232,7 @@ function audioUpdate(){
  if(!AC)return;const t=AC.currentTime,on=state==='play',f=S.v/VMAX,gear=Math.min(5,Math.floor(S.v/13)),rpm=.3+.7*clamp((S.v-gear*13)/13,0,1),hz=40+rpm*95+gear*6;
  eo1.frequency.setTargetAtTime(hz,t,.04);eo2.frequency.setTargetAtTime(hz*.5,t,.04);ef.frequency.setTargetAtTime(300+rpm*900,t,.05);
  eg.gain.setTargetAtTime(on?(K.KeyW||K.ArrowUp?.2:.15):0,t,.08);wg.gain.setTargetAtTime(on||state==='crash'?f*f*.45:0,t,.1);}
-function toggleMute(){muted=!muted;if(mg)mg.gain.value=muted?0:.5;$('mute').textContent=muted?'SOUND OFF':'SOUND ON';}
+function toggleMute(){muted=!muted;if(mg)mg.gain.value=muted?0:.5;$('mute').textContent=muted?'SOUND OFF':'SOUND ON';syncMusic();}
 
 /* ---------- game logic ---------- */
 const eS=$('score'),eD=$('dist'),eB=$('best'),dv=$('dv'),vig=$('vig');let nd;
@@ -245,7 +252,7 @@ function reset(){
  for(const v of veh){v.on=false;v.g.visible=false;}
  for(let i=0;i<9;i++)spawn(veh[i],-(70+i*28+rnd(0,12)));
  sparks.visible=false;$('flash').style.opacity=0;hud.k=-1;}
-function start(){reset();setState('play');last=performance.now();}
+function start(){reset();setState('play');last=performance.now();syncMusic();}
 function pause(){if(state==='play')setState('pause');}
 function resume(){if(state==='pause'){setState('play');last=performance.now();}}
 
