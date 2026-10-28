@@ -393,7 +393,7 @@ function stepSparks(dt){if(!sparks.visible)return;
 
 /* ---------- audio ---------- */
 // Gameplay soundtrack: a random track each ride (all files sit beside index.html, album covers too). When a song ends another one starts.
-const TRACKS=['very_scary_neon_rider_music_for_gameplay.mp3','bless_up.mp3','trustissuesong.mp3','14.mp3'];
+const TRACKS=['very_scary_neon_rider_music_for_gameplay.mp3','bless up.mp3','trustissuesong.mp3','14.mp3'];
 const TRACK_INFO={'very_scary_neon_rider_music_for_gameplay.mp3':{t:'rude',img:'rudeac.jpg'},'bless_up.mp3':{t:'bless up',img:'bless_upac.jpeg'},'trustissuesong.mp3':{t:'trust issues',img:'trustissuesongac.jpeg'},'14.mp3':{t:'14',img:'14ac.jpeg'}};
 let trackPool=TRACKS.slice(),curTrack='',bag=[],hist=[],rUser=null;   // rUser: null = automatic (plays while riding), 'play' / 'pause' = chosen with the radio
 const music=new Audio();music.preload='auto';music.volume=.55;
